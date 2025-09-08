@@ -1,35 +1,39 @@
 import Project from "../models/Project.js";
+import cloudinary from "../config/cloudinary.js"
 //add project
-export const addProject =async(req,res)=> {
-    try{
-       const { title, description, liveLink,gitHubLink} = req.body;
-       const image = req.file ? `/uploads/${req.file.filename}` : null; 
-       if(!title||!description||!gitHubLink||!image)
-        return res.status(400).json({message:"One or more fields are required"})
-       const newProject=new Project({ title, description, liveLink,gitHubLink, image } )
-       await newProject.save()
-       res.status(201).json(newProject)
-    }catch(error){
-       res.status(500).json({ error: error.message });
-    }
-}
-//get projects
-export const getProjects = async (req, res) => {
+export const addProject = async (req, res) => {
   try {
-    const projects = await Project.find();
+    const { title, description, liveLink, gitHubLink } = req.body;
 
-    const baseUrl = `${req.protocol}://${req.get("host")}`;
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "projects", 
+    });
 
-    const updatedProjects = projects.map(project => ({
-      ...project._doc,
-      image: project.image ? `${baseUrl}${project.image}` : null
-    }));
+    const newProject = new Project({
+      title,
+      description,
+      liveLink,
+      gitHubLink,
+      image: result.secure_url, 
+    });
 
-    res.json(updatedProjects);
+    await newProject.save();
+    res.status(201).json(newProject);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
+//get projects
+export const getProjects = async (req, res) => {
+  try {
+    const projects = await Project.find();
+    res.json(projects); 
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 
 //update project
 export const updateProject = async (req, res) => {
