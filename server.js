@@ -24,7 +24,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Middlewares
 app.use(cors());
 app.use(express.json());
-
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // Routes
 app.use("/projects", projectRoutes);
 app.use("/contact",contactRoutes)
