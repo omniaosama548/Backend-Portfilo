@@ -28,11 +28,20 @@ export const addProject = async (req, res) => {
 export const getProjects = async (req, res) => {
   try {
     const projects = await Project.find();
-    res.json(projects); 
+
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
+
+    const updatedProjects = projects.map(project => ({
+      ...project._doc,
+      image: project.image ? `${baseUrl}/${project.image}` : null
+    }));
+
+    res.json(updatedProjects);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 
 //update project
